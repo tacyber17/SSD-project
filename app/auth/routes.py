@@ -12,6 +12,21 @@ from app.auth import auth_bp
 from app.models import User
 from app.forms import RegistrationForm, LoginForm, ChangePasswordForm, UpdateProfileForm, EnableMFAForm, VerifyMFAForm
 from app.session_security import init_session_security, clear_session_security
+from urllib.parse import urlparse, urljoin
+from flask import request
+
+def is_safe_url(target):
+    """
+    Validates that the redirect URL is safe (same server or explicitly trusted).
+    Prevents open redirect vulnerabilities.
+    """
+    host_url = urlparse(request.host_url)
+    redirect_url = urlparse(urljoin(request.host_url, target))
+
+    return (
+        redirect_url.scheme in ('http', 'https') and
+        host_url.netloc == redirect_url.netloc
+    )
 
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
@@ -66,7 +81,7 @@ def login():
             
             # Redirect to next page or home
             next_page = request.args.get('next')
-            if not next_page or not next_page.startswith('/'):
+            if not next_page or not is_safe_url(next_page):
                 next_page = url_for('main.index')
             return redirect(next_page)
         else:
@@ -198,7 +213,7 @@ def verify_2fa_login():
             session.pop('mfa_user_id', None)
             
             next_page = request.args.get('next')
-            if not next_page or not next_page.startswith('/'):
+            if not next_page or not is_safe_url(next_page):
                 next_page = url_for('main.index')
             return redirect(next_page)
         else:
@@ -216,6 +231,7 @@ def disable_2fa():
     db.session.commit()
     flash('Two-Factor Authentication has been disabled.', 'info')
     return redirect(url_for('auth.profile'))
+
 
 
 

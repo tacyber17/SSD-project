@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h1>Profile</h1>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form.username.label(class="form-label") }}
+                    {{ form.username(class="form-control") }}
+                    {% if form.username.errors %}
+                    <div class="text-danger">
+                        {% for error in form.username.errors %}
+                        <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form.email.label(class="form-label") }}
+                    {{ form.email(class="form-control") }}
+                    {% if form.email.errors %}
+                    <div class="text-danger">
+                        {% for error in form.email.errors %}
+                        <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form.first_name.label(class="form-label") }}
+                    {{ form.first_name(class="form-control") }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form.last_name.label(class="form-label") }}
+                    {{ form.last_name(class="form-control") }}
+                </div>
+            </div>
+            <div class="mb-3">
+                {{ form.phone.label(class="form-label") }}
+                {{ form.phone(class="form-control") }}
+            </div>
+            <div class="mb-3">
+                {{ form.address.label(class="form-label") }}
+                {{ form.address(class="form-control", rows="3") }}
+            </div>
+            <div class="mb-3">
+                {{ form.submit(class="btn btn-primary") }}
+                <a href="{{ url_for('auth.change_password') }}" class="btn btn-outline-secondary">Change Password</a>
+            </div>
+        </form>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">Security Settings</h5>
+            </div>
+            <div class="card-body">
+                <h6 class="card-title">Two-Factor Authentication (2FA)</h6>
+                <p class="card-text">
+                    Status:
+                    {% if current_user.mfa_enabled %}
+                    <span class="badge bg-success">Enabled</span>
+                    {% else %}
+                    <span class="badge bg-warning text-dark">Disabled</span>
+                    {% endif %}
+                </p>
+                <p class="text-muted small">
+                    Add an extra layer of security to your account by enabling 2FA.
+                </p>
+
+                {% if current_user.mfa_enabled %}
+                <a href="{{ url_for('auth.disable_2fa') }}" class="btn btn-danger">Disable 2FA</a>
+                {% else %}
+                <a href="{{ url_for('auth.enable_2fa') }}" class="btn btn-primary">Enable 2FA</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

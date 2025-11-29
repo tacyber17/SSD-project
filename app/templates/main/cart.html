@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row animate__animated animate__fadeIn">
+    <div class="col-12 mb-4">
+        <h1 class="display-5 fw-bold">Shopping Cart</h1>
+    </div>
+</div>
+
+{% if cart_items %}
+<div class="row animate__animated animate__fadeInUp">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="border-0 py-3 ps-4">Product</th>
+                                <th class="border-0 py-3">Price</th>
+                                <th class="border-0 py-3">Quantity</th>
+                                <th class="border-0 py-3">Total</th>
+                                <th class="border-0 py-3 pe-4 text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in cart_items %}
+                            <tr>
+                                <td class="ps-4 py-3">
+                                    <div class="d-flex align-items-center">
+                                        {% set placeholder_text = item.product.name|replace(' ', '+') %}
+                                        <img src="{{ item.product|product_image }}" alt="{{ item.product.name }}"
+                                            class="rounded-3"
+                                            style="width: 60px; height: 60px; object-fit: cover; margin-right: 15px;"
+                                            onerror="this.onerror=null; this.src='https://via.placeholder.com/60x60?text={{ placeholder_text }}';">
+                                        <div>
+                                            <h6 class="mb-1 fw-bold">{{ item.product.name }}</h6>
+                                            {% if item.quantity > item.product.stock %}
+                                            <small class="text-danger d-block">Only {{ item.product.stock }}
+                                                available</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="fw-medium">${{ "%.2f"|format(item.product.price) }}</td>
+                                <td>
+                                    <form method="POST" action="{{ url_for('main.update_cart', item_id=item.id) }}"
+                                        class="d-inline">
+                                        <div class="input-group input-group-sm" style="width: 130px;">
+                                            <input type="number" name="quantity" value="{{ item.quantity }}" min="1"
+                                                max="{{ item.product.stock }}" class="form-control text-center">
+                                            <button type="submit" class="btn btn-outline-primary"><i
+                                                    class="bi bi-check-lg"></i></button>
+                                        </div>
+                                    </form>
+                                </td>
+                                <td class="fw-bold text-primary">${{ "%.2f"|format(item.get_total()) }}</td>
+                                <td class="pe-4 text-end">
+                                    <form method="POST" action="{{ url_for('main.remove_from_cart', item_id=item.id) }}"
+                                        class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger border-0"
+                                            onclick="return confirm('Remove this item?')" title="Remove">
+                                            <i class="bi bi-trash fs-5"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+            <h4 class="mb-4 fw-bold">Order Summary</h4>
+            <div class="d-flex justify-content-between mb-3">
+                <span class="text-muted">Subtotal</span>
+                <span class="fw-bold">${{ "%.2f"|format(total) }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-4">
+                <span class="text-muted">Shipping</span>
+                <span class="text-success">Free</span>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-between mb-4">
+                <span class="h5 fw-bold">Total</span>
+                <span class="h5 fw-bold text-primary">${{ "%.2f"|format(total) }}</span>
+            </div>
+            <a href="{{ url_for('main.checkout') }}" class="btn btn-primary btn-lg w-100 rounded-pill">
+                Proceed to Checkout <i class="bi bi-arrow-right ms-2"></i>
+            </a>
+            <a href="{{ url_for('main.products') }}"
+                class="btn btn-link text-decoration-none text-center mt-3 text-muted">
+                Continue Shopping
+            </a>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="text-center py-5 animate__animated animate__fadeIn">
+    <div class="mb-4">
+        <i class="bi bi-cart-x display-1 text-muted opacity-25"></i>
+    </div>
+    <h3 class="fw-bold text-muted mb-3">Your cart is empty</h3>
+    <p class="text-muted mb-4">Looks like you haven't added anything to your cart yet.</p>
+    <a href="{{ url_for('main.products') }}" class="btn btn-primary btn-lg rounded-pill px-5">
+        Start Shopping
+    </a>
+</div>
+{% endif %}
+{% endblock %}

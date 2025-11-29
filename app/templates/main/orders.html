@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>My Orders</h1>
+
+{% if orders.items %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Order Number</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Total</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders.items %}
+                    <tr>
+                        <td>{{ order.order_number }}</td>
+                        <td>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if order.status == 'delivered' else 'warning' if order.status == 'pending' else 'info' }}">
+                                {{ order.status|title }}
+                            </span>
+                        </td>
+                        <td>${{ "%.2f"|format(order.total_amount) }}</td>
+                        <td>
+                            <a href="{{ url_for('main.order_detail', order_id=order.id) }}" class="btn btn-sm btn-primary">View Details</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    {% if orders.pages > 1 %}
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if orders.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('main.orders', page=orders.prev_num) }}">Previous</a>
+                </li>
+            {% endif %}
+            {% for page_num in orders.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                {% if page_num %}
+                    <li class="page-item {% if page_num == orders.page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('main.orders', page=page_num) }}">{{ page_num }}</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+            {% endfor %}
+            {% if orders.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('main.orders', page=orders.next_num) }}">Next</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+{% else %}
+    <div class="alert alert-info">
+        You have no orders yet. <a href="{{ url_for('main.products') }}">Start shopping</a>
+    </div>
+{% endif %}
+{% endblock %}
+
+

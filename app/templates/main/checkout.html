@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row animate__animated animate__fadeIn">
+    <div class="col-12 mb-4">
+        <h1 class="display-5 fw-bold">Checkout</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mb-4 animate__animated animate__fadeInUp">
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+            <h4 class="mb-4 fw-bold">Shipping & Payment</h4>
+            <form method="POST" id="checkout-form">
+                {{ form.hidden_tag() }}
+                <div class="mb-4">
+                    {{ form.shipping_address.label(class="form-label fw-bold text-muted small") }}
+                    {{ form.shipping_address(class="form-control", rows="4", placeholder="Enter your full shipping
+                    address") }}
+                    {% if form.shipping_address.errors %}
+                    <div class="text-danger small mt-1">
+                        {% for error in form.shipping_address.errors %}
+                        <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-4">
+                    {{ form.payment_method.label(class="form-label fw-bold text-muted small") }}
+                    {{ form.payment_method(class="form-select form-select-lg", onchange="togglePaymentFields()") }}
+                    {% if form.payment_method.errors %}
+                    <div class="text-danger small mt-1">
+                        {% for error in form.payment_method.errors %}
+                        <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Card Details Section -->
+                <div id="card-details" class="mb-4 p-4 border rounded-3 bg-light animate__animated animate__fadeIn"
+                    style="display: none;">
+                    <h5 class="mb-3 fw-bold text-primary"><i class="bi bi-credit-card me-2"></i>Secure Card Payment</h5>
+                    <div class="mb-3">
+                        {{ form.card_number.label(class="form-label small text-muted") }}
+                        {{ form.card_number(class="form-control", placeholder="0000 0000 0000 0000") }}
+                        {% if form.card_number.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.card_number.errors %}
+                            <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.card_expiry.label(class="form-label small text-muted") }}
+                            {{ form.card_expiry(class="form-control", placeholder="MM/YY") }}
+                            {% if form.card_expiry.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.card_expiry.errors %}
+                                <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.card_cvv.label(class="form-label small text-muted") }}
+                            {{ form.card_cvv(class="form-control", placeholder="123") }}
+                            {% if form.card_cvv.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.card_cvv.errors %}
+                                <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <small class="text-muted d-flex align-items-center"><i class="bi bi-lock-fill me-1"></i> Your card
+                        details are encrypted securely.</small>
+                </div>
+
+                <!-- Bank Details Section -->
+                <div id="bank-details" class="mb-4 p-4 border rounded-3 bg-light animate__animated animate__fadeIn"
+                    style="display: none;">
+                    <h5 class="mb-3 fw-bold text-primary"><i class="bi bi-bank me-2"></i>Bank Transfer Details</h5>
+                    <div class="mb-3">
+                        {{ form.bank_account.label(class="form-label small text-muted") }}
+                        {{ form.bank_account(class="form-control", placeholder="Enter Account Number") }}
+                        {% if form.bank_account.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.bank_account.errors %}
+                            <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <small class="text-muted d-flex align-items-center"><i class="bi bi-lock-fill me-1"></i> Your
+                        account details are encrypted securely.</small>
+                </div>
+
+                <div class="mb-4">
+                    {{ form.notes.label(class="form-label fw-bold text-muted small") }}
+                    {{ form.notes(class="form-control", rows="3", placeholder="Any special instructions for delivery?")
+                    }}
+                </div>
+
+                {{ form.submit(class="btn btn-primary btn-lg w-100 rounded-pill py-3 fw-bold") }}
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-4 animate__animated animate__fadeInUp animate__delay-1s">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden sticky-top" style="top: 2rem; z-index: 1;">
+            <div class="card-header bg-light py-3">
+                <h5 class="mb-0 fw-bold">Order Summary</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-borderless mb-0">
+                        <tbody>
+                            {% for item in cart_items %}
+                            <tr class="border-bottom">
+                                <td class="ps-4 py-3">
+                                    <div class="fw-medium">{{ item.product.name }}</div>
+                                    <small class="text-muted">Qty: {{ item.quantity }}</small>
+                                </td>
+                                <td class="pe-4 py-3 text-end fw-bold">${{ "%.2f"|format(item.get_total()) }}</td>
+                            </tr>
+                            {% endfor %}
+                            <tr class="bg-light">
+                                <td class="ps-4 py-3 h5 fw-bold">Total</td>
+                                <td class="pe-4 py-3 text-end h5 fw-bold text-primary">${{ "%.2f"|format(total) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-white p-4 border-0">
+                <div class="d-flex align-items-center text-muted small">
+                    <i class="bi bi-shield-check fs-4 me-2 text-success"></i>
+                    <span>Secure Checkout. Your data is protected.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePaymentFields() {
+        const method = document.getElementById('payment_method').value;
+        const cardSection = document.getElementById('card-details');
+        const bankSection = document.getElementById('bank-details');
+
+        if (method === 'credit_card' || method === 'debit_card') {
+            cardSection.style.display = 'block';
+            bankSection.style.display = 'none';
+        } else if (method === 'bank_transfer') {
+            cardSection.style.display = 'none';
+            bankSection.style.display = 'block';
+        } else {
+            cardSection.style.display = 'none';
+            bankSection.style.display = 'none';
+        }
+    }
+    // Run on load to set initial state
+    document.addEventListener('DOMContentLoaded', togglePaymentFields);
+</script>
+{% endblock %}
